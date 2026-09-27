@@ -724,38 +724,179 @@
     position: relative;
   }
   
-  .why-grid {
+  .why-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 2.5rem;
+    align-items: stretch;
+    margin-top: 1rem;
+  }
+
+  .why-features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
   }
   
   .why-card {
     background-color: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
-    padding: 2.5rem 2rem;
+    padding: 2.25rem 1.75rem;
     border-radius: var(--radius-md);
-    text-align: center;
+    text-align: left;
     transition: all var(--transition-normal);
+    display: flex;
+    flex-direction: column;
   }
   
   .why-card:hover {
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.08);
     transform: translateY(-5px);
+    border-color: rgba(201, 169, 110, 0.4);
   }
   
   .why-icon {
-    width: 64px; height: 64px;
-    margin: 0 auto 1.5rem;
+    width: 52px; height: 52px;
+    margin: 0 0 1.25rem 0;
     background-color: rgba(255,255,255,0.1);
     color: var(--color-accent);
-    border-radius: 50%;
+    border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 2rem;
+    font-size: 1.75rem;
+    transition: all var(--transition-normal);
+  }
+
+  .why-card:hover .why-icon {
+    background-color: var(--color-accent);
+    color: var(--color-secondary);
+    transform: scale(1.05);
   }
   
-  .why-title { font-size: 1.25rem; color: #FFFFFF; margin-bottom: 0.75rem; font-family: var(--font-sans); }
-  .why-text { color: rgba(255,255,255,0.7); font-size: 0.9rem; }
+  .why-title { font-size: 1.2rem; color: #FFFFFF; margin-bottom: 0.5rem; font-family: var(--font-sans); font-weight: 700; }
+  .why-text { color: rgba(255,255,255,0.72); font-size: 0.88rem; line-height: 1.55; }
+
+  /* Client Rating Card (Exact match to client specification) */
+  .why-rating-card {
+    background-color: #FFFFFF;
+    border-radius: 24px;
+    padding: 2.5rem 2.25rem;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .rating-card-title {
+    font-family: var(--font-sans);
+    font-size: clamp(1.85rem, 2.5vw, 2.25rem);
+    font-weight: 800;
+    color: #0A1128;
+    margin-bottom: 1.75rem;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .rating-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+    flex-grow: 1;
+    justify-content: space-around;
+  }
+
+  .rating-item {
+    width: 100%;
+  }
+
+  .rating-item-label {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0F172A;
+    margin-bottom: 0.45rem;
+    line-height: 1.3;
+  }
+
+  .rating-bar-track {
+    width: 100%;
+    height: 22px;
+    background-color: #FEEFB3; /* Soft amber pastel background track */
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .rating-bar-fill {
+    height: 100%;
+    background-color: #F5A623; /* Warm golden amber fill */
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 12px;
+    box-sizing: border-box;
+    width: var(--target-width, 100%);
+    transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .why-rating-card.reveal:not(.active) .rating-bar-fill {
+    width: 0% !important;
+  }
+
+  .rating-bar-value {
+    color: #FFFFFF;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    font-family: var(--font-sans);
+  }
+
+  .rating-card-footer {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #F1F5F9;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.85rem;
+    color: #64748B;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .rating-card-footer i {
+    font-size: 1.25rem;
+    color: #10B981;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 1024px) {
+    .why-layout {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .why-features-grid {
+      grid-template-columns: 1fr;
+    }
+    .why-rating-card {
+      padding: 2rem 1.5rem;
+    }
+    .rating-card-title {
+      font-size: 1.65rem;
+      margin-bottom: 1.5rem;
+    }
+    .rating-bar-track {
+      height: 20px;
+    }
+    .rating-items-list {
+      gap: 1.15rem;
+    }
+  }
   
   /* ==========================================================================
      Reviews Section (Horizontal Auto-Scroll)

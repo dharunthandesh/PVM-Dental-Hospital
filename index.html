@@ -743,50 +743,28 @@
         <div class="appointment-card">
           <form id="appointment-form" class="appointment-form" novalidate>
             <div class="form-grid">
-              <!-- First Name -->
+              <!-- Row 1: Patient Name & Mobile Number -->
               <div class="form-field">
-                <label for="appt-name" class="field-label">First Name <span class="req">*</span></label>
-                <input type="text" id="appt-name" name="name" class="field-input" placeholder="e.g. Karthik" required>
+                <label for="appt-name" class="field-label">Patient Name <span class="req">*</span></label>
+                <input type="text" id="appt-name" name="name" class="field-input" placeholder="Enter patient name" required>
               </div>
 
-              <!-- Select Treatment -->
-              <div class="form-field">
-                <label for="appt-treatment" class="field-label">Select Treatment</label>
-                <div class="select-wrapper">
-                  <select id="appt-treatment" name="treatment" class="field-input field-select">
-                    <option value="">Select Treatment</option>
-                    <option value="Root Canal Treatment">Root Canal Treatment</option>
-                    <option value="Dental Implants">Dental Implants</option>
-                    <option value="Invisalign">Invisalign</option>
-                    <option value="Teeth Cleaning">Teeth Cleaning</option>
-                    <option value="Tooth Extraction">Tooth Extraction</option>
-                    <option value="Teeth Whitening">Teeth Whitening</option>
-                    <option value="Braces">Braces</option>
-                    <option value="Dental Fillings">Dental Fillings</option>
-                    <option value="Smile Makeover">Smile Makeover</option>
-                    <option value="General Consultation">General Consultation</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Mobile Number -->
               <div class="form-field">
                 <label for="appt-phone" class="field-label">Mobile Number <span class="req">*</span></label>
-                <input type="tel" id="appt-phone" name="phone" class="field-input" placeholder="Mobile Number" required>
+                <input type="tel" id="appt-phone" name="phone" class="field-input" placeholder="10-digit mobile number" maxlength="10" pattern="[0-9]{10}" required>
               </div>
 
-              <!-- Preferred Date -->
+              <!-- Row 2: Preferred Date & Time Slot -->
               <div class="form-field">
                 <label for="appt-date" class="field-label">Preferred Date <span class="req">*</span></label>
                 <input type="date" id="appt-date" name="date" class="field-input" required>
               </div>
 
-              <!-- Preferred Time (Booking Slot) -->
-              <div class="form-field form-field-full">
-                <label for="appt-time" class="field-label">Preferred Time</label>
+              <div class="form-field">
+                <label for="appt-time" class="field-label">Preferred Time Slot</label>
                 <div class="select-wrapper">
                   <select id="appt-time" name="time" class="field-input field-select">
-                    <option value="">Select Time</option>
+                    <option value="">Select Time Slot</option>
                     <option value="Morning (09:00 AM – 12:00 PM)">Morning (09:00 AM – 12:00 PM)</option>
                     <option value="Afternoon (12:00 PM – 04:00 PM)">Afternoon (12:00 PM – 04:00 PM)</option>
                     <option value="Evening (04:00 PM – 08:00 PM)">Evening (04:00 PM – 08:00 PM)</option>
@@ -796,10 +774,30 @@
                 </div>
               </div>
 
-              <!-- Write Your Comment Here (Optional) -->
+              <!-- Row 3: Select Treatment -->
+              <div class="form-field form-field-full">
+                <label for="appt-treatment" class="field-label">Select Treatment</label>
+                <div class="select-wrapper">
+                  <select id="appt-treatment" name="treatment" class="field-input field-select">
+                    <option value="">Select Treatment</option>
+                    <option value="Root Canal Treatment (RCT)">Root Canal Treatment (RCT)</option>
+                    <option value="Dental Implants">Dental Implants</option>
+                    <option value="Invisalign & Clear Aligners">Invisalign & Clear Aligners</option>
+                    <option value="Teeth Scaling & Polishing">Teeth Scaling & Polishing</option>
+                    <option value="Tooth Extraction">Tooth Extraction</option>
+                    <option value="Teeth Whitening">Teeth Whitening</option>
+                    <option value="Dental Braces & Orthodontics">Dental Braces & Orthodontics</option>
+                    <option value="Dental Fillings & Restorations">Dental Fillings & Restorations</option>
+                    <option value="Smile Makeover & Cosmetic">Smile Makeover & Cosmetic</option>
+                    <option value="General Consultation & Checkup">General Consultation & Checkup</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Row 4: Write Your Comment Here (Optional) -->
               <div class="form-field form-field-full">
                 <label for="appt-comment" class="field-label">Write Your Comment Here <span class="opt">(Optional)</span></label>
-                <textarea id="appt-comment" name="comment" rows="4" class="field-input field-textarea" placeholder="Write Your Comment Here"></textarea>
+                <textarea id="appt-comment" name="comment" rows="3" class="field-input field-textarea" placeholder="Describe any tooth pain, symptoms, or special requests..."></textarea>
               </div>
             </div>
 

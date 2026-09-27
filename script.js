@@ -258,9 +258,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const apptDateInput = document.getElementById('appt-date');
 
     if (apptDateInput) {
-      // Set min date to today
-      const today = new Date().toISOString().split('T')[0];
-      apptDateInput.min = today;
+      // Set min date to today and max date to 6 months from now
+      const now = new Date();
+      const todayISO = now.toISOString().split('T')[0];
+      const maxDate = new Date();
+      maxDate.setMonth(maxDate.getMonth() + 6);
+      const maxISO = maxDate.toISOString().split('T')[0];
+
+      apptDateInput.min = todayISO;
+      apptDateInput.max = maxISO;
     }
 
     if (apptForm) {
@@ -281,34 +287,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeSlot = timeInput && timeInput.value ? timeInput.value : 'Flexible / Any Available Slot';
         const comment = commentInput ? commentInput.value.trim() : '';
 
-        // Validation
-        let isValid = true;
-
-        if (!name) {
+        // 1. Validate Patient Name
+        if (!name || name.length < 2) {
           nameInput.classList.add('input-error');
-          isValid = false;
-        } else {
-          nameInput.classList.remove('input-error');
-        }
-
-        if (!phone || phone.length < 8) {
-          phoneInput.classList.add('input-error');
-          isValid = false;
-        } else {
-          phoneInput.classList.remove('input-error');
-        }
-
-        if (!dateVal) {
-          dateInput.classList.add('input-error');
-          isValid = false;
-        } else {
-          dateInput.classList.remove('input-error');
-        }
-
-        if (!isValid) {
-          alert('Please fill in your Name, Mobile Number, and Preferred Date.');
+          alert('Please enter a valid patient name.');
+          nameInput.focus();
           return;
         }
+        nameInput.classList.remove('input-error');
+
+        // 2. Validate Mobile Number (10 digits)
+        const cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.length < 10) {
+          phoneInput.classList.add('input-error');
+          alert('Please enter a valid 10-digit mobile number.');
+          phoneInput.focus();
+          return;
+        }
+        phoneInput.classList.remove('input-error');
+
+        // 3. Validate Date (Cannot be past date or invalid year like 1222)
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        const parsedDate = new Date(dateVal);
+
+        if (!dateVal || isNaN(parsedDate.getTime())) {
+          dateInput.classList.add('input-error');
+          alert('Please select a valid date for your appointment.');
+          dateInput.focus();
+          return;
+        }
+
+        if (parsedDate < todayDate) {
+          dateInput.classList.add('input-error');
+          alert('Appointment date cannot be in the past. Please select today or an upcoming date.');
+          dateInput.focus();
+          return;
+        }
+
+        const currentYear = todayDate.getFullYear();
+        if (parsedDate.getFullYear() < currentYear || parsedDate.getFullYear() > currentYear + 1) {
+          dateInput.classList.add('input-error');
+          alert(`Please select an appointment date within ${currentYear} or ${currentYear + 1}.`);
+          dateInput.focus();
+          return;
+        }
+        dateInput.classList.remove('input-error');
 
         // Format Date into DD-MM-YYYY
         let displayDate = dateVal;

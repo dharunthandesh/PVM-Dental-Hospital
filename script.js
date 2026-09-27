@@ -252,4 +252,99 @@ document.addEventListener('DOMContentLoaded', () => {
         startAutoPlay();
       }, 500); // Small timeout to ensure page rendering is complete
     }
+
+    // 6. Appointment Booking Form -> WhatsApp Redirection
+    const apptForm = document.getElementById('appointment-form');
+    const apptDateInput = document.getElementById('appt-date');
+
+    if (apptDateInput) {
+      // Set min date to today
+      const today = new Date().toISOString().split('T')[0];
+      apptDateInput.min = today;
+    }
+
+    if (apptForm) {
+      apptForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const nameInput = document.getElementById('appt-name');
+        const phoneInput = document.getElementById('appt-phone');
+        const treatmentInput = document.getElementById('appt-treatment');
+        const dateInput = document.getElementById('appt-date');
+        const timeInput = document.getElementById('appt-time');
+        const commentInput = document.getElementById('appt-comment');
+
+        const name = nameInput ? nameInput.value.trim() : '';
+        const phone = phoneInput ? phoneInput.value.trim() : '';
+        const treatment = treatmentInput && treatmentInput.value ? treatmentInput.value : 'General Dental Consultation';
+        const dateVal = dateInput ? dateInput.value : '';
+        const timeSlot = timeInput && timeInput.value ? timeInput.value : 'Flexible / Any Available Slot';
+        const comment = commentInput ? commentInput.value.trim() : '';
+
+        // Validation
+        let isValid = true;
+
+        if (!name) {
+          nameInput.classList.add('input-error');
+          isValid = false;
+        } else {
+          nameInput.classList.remove('input-error');
+        }
+
+        if (!phone || phone.length < 8) {
+          phoneInput.classList.add('input-error');
+          isValid = false;
+        } else {
+          phoneInput.classList.remove('input-error');
+        }
+
+        if (!dateVal) {
+          dateInput.classList.add('input-error');
+          isValid = false;
+        } else {
+          dateInput.classList.remove('input-error');
+        }
+
+        if (!isValid) {
+          alert('Please fill in your Name, Mobile Number, and Preferred Date.');
+          return;
+        }
+
+        // Format Date into DD-MM-YYYY
+        let displayDate = dateVal;
+        if (dateVal.includes('-')) {
+          const parts = dateVal.split('-');
+          if (parts.length === 3) {
+            displayDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          }
+        }
+
+        // Build WhatsApp Message Template with booking slot and timings
+        let text = `🦷 *Appointment Booking Request - PVM Dental Clinic*\n\n`;
+        text += `👤 *Patient Name:* ${name}\n`;
+        text += `📱 *Mobile Number:* ${phone}\n`;
+        text += `🩺 *Selected Treatment:* ${treatment}\n`;
+        text += `📅 *Preferred Date:* ${displayDate}\n`;
+        text += `⏰ *Booking Slot:* ${timeSlot}\n`;
+        if (comment) {
+          text += `💬 *Patient Comment:* ${comment}\n`;
+        }
+        text += `\nPlease confirm my appointment slot with Dr. Mayuri AP. Thank you!`;
+
+        const encodedText = encodeURIComponent(text);
+        const whatsappUrl = `https://wa.me/919677104464?text=${encodedText}`;
+
+        // Feedback state on button
+        const submitBtn = document.getElementById('btn-submit-appointment');
+        if (submitBtn) {
+          const originalHTML = submitBtn.innerHTML;
+          submitBtn.innerHTML = `<i class="ph-fill ph-spinner ph-spin"></i> Opening WhatsApp...`;
+          setTimeout(() => {
+            submitBtn.innerHTML = originalHTML;
+          }, 2500);
+        }
+
+        window.open(whatsappUrl, '_blank');
+      });
+    }
   });

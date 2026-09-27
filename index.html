@@ -44,7 +44,7 @@
       </div>
 
       <div class="nav-actions">
-        <a href="https://wa.me/919677104464" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+        <a href="#appointment" class="btn btn-primary btn-sm">
           Book Appointment
         </a>
         <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Menu">
@@ -73,7 +73,7 @@
         <p style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.35rem;"><a href="tel:+919677104464" style="color: var(--color-primary);"><i class="ph ph-phone"></i> +91 96771 04464</a></p>
         <p style="font-size: 0.95rem; font-weight: 600;"><a href="tel:+919600966964" style="color: var(--color-primary);"><i class="ph ph-phone"></i> +91 96009 66964</a></p>
       </div>
-      <a href="https://wa.me/919677104464" target="_blank" rel="noopener" class="btn btn-primary mobile-btn">Book Appointment</a>
+      <a href="#appointment" class="btn btn-primary mobile-btn">Book Appointment</a>
     </div>
   </div>
 
@@ -98,7 +98,7 @@
         </p>
         <div class="hero-cta">
           <div class="hero-cta-group">
-            <a href="https://wa.me/919677104464" target="_blank" rel="noopener" class="btn btn-primary">
+            <a href="#appointment" class="btn btn-primary">
               <i class="ph-fill ph-calendar-check"></i> Book Appointment
             </a>
             <a href="#gallery" class="btn btn-outline">
@@ -730,19 +730,89 @@
     </div>
   </section>
 
-  <!-- CTA Banner -->
-  <section class="section cta-banner">
+  <!-- Appointment Booking Section -->
+  <section class="section appointment-section" id="appointment">
     <div class="container">
-      <div class="cta-inner reveal fade-up">
-        <h2 class="cta-title">Ready to Visit PVM Dental Clinic?</h2>
-        <p class="cta-desc">Don't wait to take care of your dental health. Contact PVM Dental Clinic today — our friendly team is ready 24/7 to help you.</p>
-        <div class="cta-actions">
-          <a href="https://wa.me/919677104464" target="_blank" rel="noopener" class="btn btn-whatsapp">
-            <i class="ph-fill ph-whatsapp-logo"></i> Chat on WhatsApp
-          </a>
-          <a href="https://www.google.com/maps/dir/?api=1&destination=9.9266702,78.0925581" target="_blank" rel="noopener" class="btn btn-primary bg-navy text-white">
-            <i class="ph-fill ph-map-pin"></i> Get Directions
-          </a>
+      <div class="appointment-wrapper reveal fade-up">
+        <div class="appointment-header text-center">
+          <span class="section-tag"><i class="ph-fill ph-calendar-plus"></i> Online Booking</span>
+          <h2 class="section-title">Book an Appointment</h2>
+          <p class="section-lead mx-auto">Schedule your consultation with Dr. Mayuri AP at PVM Dental Clinic. Fill in your preferred slot below and confirm directly on WhatsApp.</p>
+        </div>
+
+        <div class="appointment-card">
+          <form id="appointment-form" class="appointment-form" novalidate>
+            <div class="form-grid">
+              <!-- First Name -->
+              <div class="form-field">
+                <label for="appt-name" class="field-label">First Name <span class="req">*</span></label>
+                <input type="text" id="appt-name" name="name" class="field-input" placeholder="e.g. Anderson" required>
+              </div>
+
+              <!-- Select Treatment -->
+              <div class="form-field">
+                <label for="appt-treatment" class="field-label">Select Treatment</label>
+                <div class="select-wrapper">
+                  <select id="appt-treatment" name="treatment" class="field-input field-select">
+                    <option value="">Select Treatment</option>
+                    <option value="Root Canal Treatment">Root Canal Treatment</option>
+                    <option value="Dental Implants">Dental Implants</option>
+                    <option value="Invisalign">Invisalign</option>
+                    <option value="Teeth Cleaning">Teeth Cleaning</option>
+                    <option value="Tooth Extraction">Tooth Extraction</option>
+                    <option value="Teeth Whitening">Teeth Whitening</option>
+                    <option value="Braces">Braces</option>
+                    <option value="Dental Fillings">Dental Fillings</option>
+                    <option value="Smile Makeover">Smile Makeover</option>
+                    <option value="General Consultation">General Consultation</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Mobile Number -->
+              <div class="form-field">
+                <label for="appt-phone" class="field-label">Mobile Number <span class="req">*</span></label>
+                <input type="tel" id="appt-phone" name="phone" class="field-input" placeholder="Mobile Number" required>
+              </div>
+
+              <!-- Preferred Date -->
+              <div class="form-field">
+                <label for="appt-date" class="field-label">Preferred Date <span class="req">*</span></label>
+                <input type="date" id="appt-date" name="date" class="field-input" required>
+              </div>
+
+              <!-- Preferred Time (Booking Slot) -->
+              <div class="form-field form-field-full">
+                <label for="appt-time" class="field-label">Preferred Time</label>
+                <div class="select-wrapper">
+                  <select id="appt-time" name="time" class="field-input field-select">
+                    <option value="">Select Time</option>
+                    <option value="Morning (09:00 AM – 12:00 PM)">Morning (09:00 AM – 12:00 PM)</option>
+                    <option value="Afternoon (12:00 PM – 04:00 PM)">Afternoon (12:00 PM – 04:00 PM)</option>
+                    <option value="Evening (04:00 PM – 08:00 PM)">Evening (04:00 PM – 08:00 PM)</option>
+                    <option value="Night (08:00 PM – 11:00 PM)">Night (08:00 PM – 11:00 PM)</option>
+                    <option value="Emergency (24 Hours Open)">Emergency (24 Hours Open)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Write Your Comment Here (Optional) -->
+              <div class="form-field form-field-full">
+                <label for="appt-comment" class="field-label">Write Your Comment Here <span class="opt">(Optional)</span></label>
+                <textarea id="appt-comment" name="comment" rows="4" class="field-input field-textarea" placeholder="Write Your Comment Here"></textarea>
+              </div>
+            </div>
+
+            <div class="form-action text-center">
+              <button type="submit" class="btn btn-primary btn-submit" id="btn-submit-appointment">
+                <i class="ph-fill ph-whatsapp-logo"></i> Book Appointment
+              </button>
+              <div class="form-redirect-notice">
+                <i class="ph-fill ph-check-circle"></i>
+                <span>Redirects to WhatsApp with your slot and details for instant clinic confirmation.</span>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

@@ -415,9 +415,30 @@
   }
   
   .hero-title {
-    font-size: clamp(2.2rem, 3.8vw, 3.4rem);
-    margin-bottom: 1.15rem;
-    line-height: 1.15;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-title-brand {
+    font-family: var(--font-serif);
+    font-size: clamp(2.8rem, 5.2vw, 4.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    display: block;
+  }
+
+  .hero-title-tagline {
+    font-family: var(--font-serif);
+    font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+    font-weight: 500;
+    color: var(--color-secondary);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    display: block;
+    opacity: 0.88;
   }
   
   .hero-subtitle {

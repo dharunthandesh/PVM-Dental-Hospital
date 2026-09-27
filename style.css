@@ -538,8 +538,8 @@
   .image-grid .img-1 { margin-top: 3rem; }
   
   .features-list {
-    margin-top: 2.5rem;
-    display: flex; flex-direction: column; gap: 1.5rem;
+    margin-top: 2rem;
+    display: flex; flex-direction: column; gap: 1.25rem;
   }
   
   .feature-item { display: flex; gap: 1rem; align-items: flex-start; }
@@ -552,10 +552,107 @@
     border-radius: var(--radius-sm);
     display: flex; align-items: center; justify-content: center;
     font-size: 1.5rem;
+    transition: transform var(--transition-normal);
+  }
+
+  .feature-item:hover .feature-icon-box {
+    transform: scale(1.08);
   }
   
-  .feature-name { font-size: 1.125rem; font-family: var(--font-sans); margin-bottom: 0.25rem; color: var(--color-secondary); }
-  .feature-desc { font-size: 0.9rem; color: var(--color-text-muted); }
+  .feature-name { font-size: 1.1rem; font-family: var(--font-sans); margin-bottom: 0.25rem; color: var(--color-secondary); font-weight: 600; }
+  .feature-desc { font-size: 0.92rem; color: var(--color-text-muted); line-height: 1.5; }
+
+  /* Doctor Specific Styling */
+  .doctor-credentials {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.75rem 0 1.25rem;
+  }
+
+  .badge-credential {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-primary);
+    color: #FFFFFF;
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  .badge-role {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-accent-light);
+    color: #8C6A2E;
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(201, 169, 110, 0.35);
+  }
+
+  .badge-hospital {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .doctor-bio {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-text-main);
+    margin-bottom: 1.5rem;
+  }
+
+  .doctor-cta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .doctor-exp-badge {
+    position: absolute;
+    bottom: -15px;
+    right: -15px;
+    background: #FFFFFF;
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-float);
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 2;
+  }
+
+  .exp-number {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    line-height: 1;
+  }
+
+  .exp-text strong {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--color-secondary);
+    line-height: 1.2;
+  }
+
+  .exp-text span {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
   
   /* ==========================================================================
      Services Section
@@ -850,6 +947,42 @@
   .contact-value { font-weight: 500; color: var(--color-secondary); }
   .contact-value a { color: var(--color-primary); }
   .contact-value a:hover { text-decoration: underline; }
+
+  .phone-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .phone-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    transition: color var(--transition-fast);
+  }
+
+  .phone-links a:hover {
+    color: #8C1424;
+  }
+
+  .phone-divider {
+    color: var(--color-border);
+  }
+
+  .badge-open-24 {
+    display: inline-flex;
+    align-items: center;
+    background-color: #DEF7EC;
+    color: #03543F;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-full);
+    margin-right: 0.5rem;
+  }
   
   .contact-map {
     border-radius: var(--radius-md);
@@ -869,8 +1002,8 @@
   
   .footer-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 4rem;
+    grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+    gap: 3rem;
     margin-bottom: 4rem;
   }
   
@@ -1024,6 +1157,27 @@
     
     .contact-item { flex-direction: column; text-align: center; align-items: center; }
     .feature-item { flex-direction: column; text-align: center; align-items: center; }
+
+    .doctor-exp-badge {
+      position: static;
+      margin-top: 1rem;
+      justify-content: center;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .doctor-credentials {
+      justify-content: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .doctor-cta {
+      flex-direction: column;
+      width: 100%;
+    }
+    .doctor-cta .btn {
+      width: 100%;
+    }
     
     .nav-container { padding: 0 4%; }
     .container { padding: 0 4%; }
@@ -1066,6 +1220,183 @@
     color: #FFFFFF;
     border-color: var(--color-primary);
     box-shadow: 0 6px 16px rgba(168, 28, 46, 0.25);
+  }
+
+  /* ==========================================================================
+     Clinic Video Tour Showcase
+     ========================================================================== */
+  .video-tour-wrapper {
+    background: #FFFFFF;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 3.5rem;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 3.5rem;
+    align-items: center;
+    margin-bottom: 3.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .video-tour-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, var(--color-primary-light) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .video-tour-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .video-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.85rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+  }
+
+  .video-tour-title {
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    margin-bottom: 1rem;
+    color: var(--color-secondary);
+  }
+
+  .video-tour-desc {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .video-highlights {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 2rem;
+  }
+
+  .video-highlight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    color: var(--color-text-main);
+  }
+
+  .video-highlight-item i {
+    color: #38A169;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .video-tour-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .video-player-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .video-frame {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(40, 26, 28, 0.18);
+    border: 3px solid #FFFFFF;
+    background: #000000;
+    transition: transform var(--transition-normal);
+  }
+
+  .video-frame:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 48px rgba(40, 26, 28, 0.22);
+  }
+
+  .clinic-video {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9/16;
+    display: block;
+    object-fit: cover;
+    border-radius: calc(var(--radius-md) - 3px);
+  }
+
+  .video-overlay-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(40, 26, 28, 0.75);
+    color: #FFFFFF;
+    backdrop-filter: blur(6px);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    pointer-events: none;
+  }
+
+  .gallery-subhead {
+    margin: 2.5rem 0 1.5rem;
+  }
+
+  .gallery-subhead-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.35rem;
+    color: var(--color-secondary);
+  }
+
+  .gallery-subhead-lead {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 992px) {
+    .video-tour-wrapper {
+      grid-template-columns: 1fr;
+      padding: 2.5rem 1.75rem;
+      gap: 2.5rem;
+    }
+    .video-player-container {
+      order: -1;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .video-tour-actions {
+      flex-direction: column;
+    }
+    .video-tour-actions .btn {
+      width: 100%;
+    }
   }
 
   /* ==========================================================================

@@ -455,10 +455,16 @@
   .hero-title-brand {
     font-family: var(--font-serif);
     font-size: clamp(2.8rem, 5.2vw, 4.4rem);
-    font-weight: 700;
+    font-weight: 900;
     line-height: 1.1;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     display: block;
+    background: linear-gradient(135deg, #7A1220 0%, #A81C2E 45%, #C0273B 80%, #8B1121 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    -webkit-text-stroke: 0.45px #7A1220;
+    filter: drop-shadow(0 2px 6px rgba(122, 18, 32, 0.15));
   }
 
   .hero-title-tagline {
@@ -1759,7 +1765,7 @@
       font-size: clamp(2.5rem, 11vw, 3.4rem);
       line-height: 1.06;
       letter-spacing: -0.02em;
-      font-weight: 700;
+      font-weight: 900;
     }
     .hero-title-tagline {
       font-size: clamp(1.15rem, 4.5vw, 1.35rem);

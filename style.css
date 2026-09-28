@@ -635,23 +635,24 @@
     align-items: center;
   }
   
-  .image-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+  .doctor-portrait-wrapper {
     position: relative;
+    max-width: 440px;
+    margin: 0 auto;
+    border-radius: var(--radius-lg);
+    background: var(--color-primary-light);
+    padding: 0.85rem;
+    box-shadow: var(--shadow-lg);
   }
-  
-  .image-grid img {
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    aspect-ratio: 3/4;
+
+  .doctor-portrait-img {
+    width: 100%;
+    aspect-ratio: 4/5;
     object-fit: cover;
-  }
-  
-  .image-grid .img-1 { 
-    margin-top: 3rem; 
     object-position: center 15%;
+    border-radius: var(--radius-md);
+    display: block;
+    box-shadow: var(--shadow-sm);
   }
   
   .features-list {
@@ -1796,9 +1797,7 @@
     
     /* About Doctor Compactness */
     .about-container { gap: 1.5rem; }
-    .image-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; max-width: 320px; margin: 0 auto; }
-    .image-grid .img-1 { margin-top: 0; }
-    .image-grid img { aspect-ratio: 1/1; object-fit: cover; }
+    .doctor-portrait-wrapper { max-width: 280px; padding: 0.6rem; }
     .doctor-bio { font-size: 0.9rem; line-height: 1.55; margin-bottom: 0.85rem; }
     .doctor-exp-badge { margin-top: 0.85rem; padding: 0.65rem 1rem; }
     .exp-number { font-size: 1.8rem; }

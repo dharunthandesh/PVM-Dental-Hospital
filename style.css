@@ -1627,6 +1627,15 @@
 
     .shape-1 { width: 300px; height: 300px; right: 0; top: 0; }
     .shape-2 { width: 250px; height: 250px; left: 0; bottom: 0; }
+
+    .hero-title-brand {
+      font-size: clamp(2.6rem, 9vw, 3.8rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+    .hero-title-tagline {
+      font-size: 1.3rem;
+    }
   }
   
   @media (max-width: 480px) {
@@ -1639,8 +1648,17 @@
 
     /* Hero Section Compactness */
     .hero { padding-top: 85px; padding-bottom: 25px; min-height: auto; }
-    .hero-title-brand { font-size: clamp(1.8rem, 7vw, 2.2rem); }
-    .hero-title-tagline { font-size: 1.05rem; }
+    .hero-title-brand {
+      font-size: clamp(2.5rem, 11vw, 3.4rem);
+      line-height: 1.06;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+    }
+    .hero-title-tagline {
+      font-size: clamp(1.15rem, 4.5vw, 1.35rem);
+      letter-spacing: -0.01em;
+      margin-top: 0.2rem;
+    }
     .hero-subtitle { font-size: 0.88rem; max-width: 100%; margin: 0 auto 1.15rem; line-height: 1.5; }
     
     .badge {

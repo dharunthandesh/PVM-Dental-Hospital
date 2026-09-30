@@ -2130,11 +2130,11 @@
       background: 
         linear-gradient(
           to bottom, 
-          rgba(7, 10, 18, 0.96) 0%, 
-          rgba(7, 10, 18, 0.88) 55%, 
-          rgba(7, 10, 18, 0.98) 100%
+          rgba(7, 10, 18, 0.70) 0%, 
+          rgba(7, 10, 18, 0.42) 50%, 
+          rgba(7, 10, 18, 0.85) 100%
         ),
-        url('hero-camp-bg.webp') center top / cover no-repeat !important;
+        url('hero-camp-bg.webp') center 20% / cover no-repeat !important;
       background-attachment: scroll;
     }
 
@@ -2143,11 +2143,11 @@
       background: 
         linear-gradient(
           to bottom,
-          rgba(10, 5, 8, 0.92) 0%,
-          rgba(10, 5, 8, 0.82) 50%,
-          rgba(10, 5, 8, 0.95) 100%
+          rgba(10, 5, 8, 0.68) 0%,
+          rgba(10, 5, 8, 0.42) 50%,
+          rgba(10, 5, 8, 0.85) 100%
         ),
-        url('services-camp-bg.webp') center center / cover no-repeat !important;
+        url('services-camp-bg.webp') center 30% / cover no-repeat !important;
       background-attachment: scroll;
     }
 
@@ -2222,11 +2222,11 @@
       background: 
         linear-gradient(
           to bottom, 
-          rgba(7, 10, 18, 0.97) 0%, 
-          rgba(7, 10, 18, 0.90) 60%, 
-          rgba(7, 10, 18, 0.98) 100%
+          rgba(7, 10, 18, 0.72) 0%, 
+          rgba(7, 10, 18, 0.45) 50%, 
+          rgba(7, 10, 18, 0.88) 100%
         ),
-        url('hero-camp-bg.webp') center top / cover no-repeat !important;
+        url('hero-camp-bg.webp') center 20% / cover no-repeat !important;
       background-attachment: scroll;
       overflow-x: hidden;
     }

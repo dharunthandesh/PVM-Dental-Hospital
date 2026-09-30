@@ -2092,6 +2092,12 @@
   }
   
   @media (max-width: 768px) {
+    html, body {
+      overflow-x: hidden !important;
+      width: 100% !important;
+      max-width: 100vw !important;
+    }
+    
     .services-grid {
       display: flex;
       flex-wrap: wrap;
@@ -2112,10 +2118,38 @@
     .brand { justify-content: flex-start; }
     .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
     
-    .section { padding: 3rem 0; overflow-x: clip; }
+    .section { padding: 3rem 0; overflow-x: hidden; }
     .section-header { margin-bottom: 1.75rem; }
     .section-title { font-size: 1.75rem; margin-bottom: 0.5rem; }
-    .hero { padding-top: 100px; padding-bottom: 40px; min-height: auto; overflow-x: clip; }
+    
+    .hero {
+      padding-top: 100px;
+      padding-bottom: 40px;
+      min-height: auto;
+      overflow-x: hidden;
+      background: 
+        linear-gradient(
+          to bottom, 
+          rgba(7, 10, 18, 0.96) 0%, 
+          rgba(7, 10, 18, 0.88) 55%, 
+          rgba(7, 10, 18, 0.98) 100%
+        ),
+        url('hero-camp-bg.webp') center top / cover no-repeat !important;
+      background-attachment: scroll;
+    }
+
+    .services-section {
+      overflow-x: hidden;
+      background: 
+        linear-gradient(
+          to bottom,
+          rgba(10, 5, 8, 0.92) 0%,
+          rgba(10, 5, 8, 0.82) 50%,
+          rgba(10, 5, 8, 0.95) 100%
+        ),
+        url('services-camp-bg.webp') center center / cover no-repeat !important;
+      background-attachment: scroll;
+    }
 
     /* Convert horizontal reveals to vertical fade-up to eliminate horizontal scrollbar */
     .fade-left, .fade-right {
@@ -2181,7 +2215,21 @@
     .section-lead { font-size: 0.88rem; line-height: 1.5; }
 
     /* Hero Section Compactness */
-    .hero { padding-top: 85px; padding-bottom: 25px; min-height: auto; }
+    .hero {
+      padding-top: 85px;
+      padding-bottom: 25px;
+      min-height: auto;
+      background: 
+        linear-gradient(
+          to bottom, 
+          rgba(7, 10, 18, 0.97) 0%, 
+          rgba(7, 10, 18, 0.90) 60%, 
+          rgba(7, 10, 18, 0.98) 100%
+        ),
+        url('hero-camp-bg.webp') center top / cover no-repeat !important;
+      background-attachment: scroll;
+      overflow-x: hidden;
+    }
     .hero-title-brand {
       font-size: clamp(2.5rem, 11vw, 3.4rem);
       line-height: 1.06;

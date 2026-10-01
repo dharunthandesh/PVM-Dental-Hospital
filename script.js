@@ -1,4 +1,83 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // 0. Intro Loading Screen (First Entry Slideshow of Campaign & Free Camps)
+    const introLoader = document.getElementById('intro-loader');
+    const loaderImg = document.getElementById('loader-active-img');
+    const loaderCounter = document.getElementById('loader-camp-counter');
+    const loaderProgressBar = document.getElementById('loader-progress-bar');
+    const loaderSkipBtn = document.getElementById('loader-skip-btn');
+
+    if (introLoader) {
+      const campImages = [
+        'camp-outreach-1.webp',
+        'pvm-camp-oral-exam.webp',
+        'camp-outreach-2.webp',
+        'pvm-camp-consultation-1.webp',
+        'camp-outreach-3.webp',
+        'pvm-camp-patient-care.webp',
+        'camp-outreach-4.webp',
+        'pvm-camp-doctor-consulting.webp',
+        'camp-outreach-5.webp',
+        'pvm-camp-prescription-notes.webp',
+        'camp-outreach-6.webp',
+        'pvm-camp-banner-checkup.webp',
+        'camp-outreach-7.webp',
+        'hero-camp-bg.webp',
+        'camp-outreach-8.webp',
+        'about-camp-bg.webp',
+        'camp-outreach-9.webp',
+        'camp-outreach-10.webp'
+      ];
+
+      document.body.style.overflow = 'hidden';
+      let currentIdx = 0;
+      const durationTotalMs = 2750; // 2.75 seconds total intro animation (2x speed)
+      const intervalMs = Math.floor(durationTotalMs / campImages.length); // ~150ms rapid transition per photo
+      const startTime = Date.now();
+
+      // Preload loader images for ultra-smooth fast transitions
+      campImages.forEach(src => {
+        const img = new Image();
+        img.src = src;
+      });
+
+      // Fast image transition timer
+      const imgTimer = setInterval(() => {
+        currentIdx = (currentIdx + 1) % campImages.length;
+        if (loaderImg) {
+          loaderImg.src = campImages[currentIdx];
+        }
+        if (loaderCounter) {
+          loaderCounter.textContent = `Camp Photo ${currentIdx + 1} / ${campImages.length}`;
+        }
+      }, intervalMs);
+
+      // Smooth progress bar timer
+      const progressTimer = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progressPercent = Math.min(100, (elapsed / durationTotalMs) * 100);
+        if (loaderProgressBar) {
+          loaderProgressBar.style.width = progressPercent + '%';
+        }
+        if (elapsed >= durationTotalMs) {
+          finishLoader();
+        }
+      }, 30);
+
+      function finishLoader() {
+        clearInterval(imgTimer);
+        clearInterval(progressTimer);
+        introLoader.classList.add('fade-out');
+        setTimeout(() => {
+          introLoader.style.display = 'none';
+          document.body.style.overflow = '';
+        }, 400);
+      }
+
+      if (loaderSkipBtn) {
+        loaderSkipBtn.addEventListener('click', finishLoader);
+      }
+    }
+
     // 1. Navbar Scroll Effect
     const navbar = document.getElementById('navbar');
     
@@ -68,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 
     // 4. Services Category Filter
-    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabBtns = document.querySelectorAll('.tab-btn:not(.gallery-tab-btn)');
     const serviceCards = document.querySelectorAll('.service-card');
   
     tabBtns.forEach(btn => {
@@ -82,12 +161,32 @@ document.addEventListener('DOMContentLoaded', () => {
           const category = card.getAttribute('data-category');
           if (filterValue === 'all' || category === filterValue) {
             card.style.display = '';
-            // Trigger a reflow
             void card.offsetWidth;
             card.classList.add('active');
           } else {
             card.style.display = 'none';
             card.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    // 4b. Gallery Photo Category Filter (Optimized 60fps)
+    const galleryTabBtns = document.querySelectorAll('.gallery-tab-btn');
+    const galleryItems = document.querySelectorAll('.gallery-item[data-gallery-cat]');
+
+    galleryTabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        galleryTabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filterVal = btn.getAttribute('data-gallery-filter');
+
+        galleryItems.forEach(item => {
+          const cat = item.getAttribute('data-gallery-cat');
+          if (filterVal === 'all' || cat === filterVal) {
+            item.style.display = '';
+          } else {
+            item.style.display = 'none';
           }
         });
       });

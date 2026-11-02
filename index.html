@@ -961,6 +961,16 @@
         <span class="section-tag">Patient Reviews</span>
         <h2 class="section-title">Patient Reviews & Experiences in Madurai</h2>
         <p class="section-lead mx-auto">Highly rated by our patients in Madurai — here are direct reviews from our Google Maps profile.</p>
+        
+        <!-- Action Buttons to Leave / View Reviews -->
+        <div class="reviews-actions-bar">
+          <button type="button" class="btn btn-primary" id="open-review-modal-btn">
+            <i class="ph-bold ph-pencil-simple"></i> Share Your Experience
+          </button>
+          <a href="https://maps.google.com/maps?q=9.9266702,78.0925581" target="_blank" rel="noopener noreferrer" class="btn btn-outline reviews-google-btn">
+            <i class="ph-bold ph-google-logo"></i> Review on Google
+          </a>
+        </div>
       </div>
       
       <!-- Reviews Slider Wrapper -->
@@ -1375,13 +1385,94 @@
     </div>
   </footer>
 
+  <!-- Patient Review Modal -->
+  <div id="review-modal" class="review-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="review-modal-title">
+    <div class="review-modal-backdrop" id="review-modal-backdrop"></div>
+    <div class="review-modal-card">
+      <button type="button" class="review-modal-close" id="close-review-modal-btn" aria-label="Close review modal">
+        <i class="ph-bold ph-x"></i>
+      </button>
+
+      <div class="review-modal-header">
+        <div class="review-modal-badge"><i class="ph-fill ph-heart"></i> Patient Feedback</div>
+        <h3 id="review-modal-title" class="review-modal-title">Share Your Dental Experience</h3>
+        <p class="review-modal-desc">Your feedback helps others in Madurai choose trusted dental care. Reviews appear on our website after verification.</p>
+      </div>
+
+      <form id="patient-review-form" class="review-form">
+        <!-- Rating Select -->
+        <div class="review-form-group text-center">
+          <label class="review-form-label">How was your experience? *</label>
+          <div class="star-rating-selector" id="star-rating-selector">
+            <button type="button" class="star-btn active" data-rating="1" aria-label="1 star"><i class="ph-fill ph-star"></i></button>
+            <button type="button" class="star-btn active" data-rating="2" aria-label="2 stars"><i class="ph-fill ph-star"></i></button>
+            <button type="button" class="star-btn active" data-rating="3" aria-label="3 stars"><i class="ph-fill ph-star"></i></button>
+            <button type="button" class="star-btn active" data-rating="4" aria-label="4 stars"><i class="ph-fill ph-star"></i></button>
+            <button type="button" class="star-btn active" data-rating="5" aria-label="5 stars"><i class="ph-fill ph-star"></i></button>
+          </div>
+          <span class="rating-feedback-text" id="rating-feedback-text">5.0 - Excellent Treatment</span>
+          <input type="hidden" name="rating" id="review-rating-input" value="5">
+        </div>
+
+        <div class="review-form-grid">
+          <!-- Patient Name -->
+          <div class="review-form-group">
+            <label for="review-patient-name" class="review-form-label">Your Name *</label>
+            <input type="text" id="review-patient-name" name="name" class="field-input" placeholder="e.g. Anandha Kumar" required>
+          </div>
+
+          <!-- Treatment -->
+          <div class="review-form-group">
+            <label for="review-treatment" class="review-form-label">Treatment Received *</label>
+            <select id="review-treatment" name="treatment" class="field-input" required>
+              <option value="" disabled selected>Select dental treatment</option>
+              <option value="Teeth Cleaning & Scaling">Teeth Cleaning & Scaling</option>
+              <option value="Root Canal Treatment (RCT)">Root Canal Treatment (RCT)</option>
+              <option value="Dental Braces & Aligners">Dental Braces & Aligners</option>
+              <option value="Tooth Extraction">Tooth Extraction & Surgery</option>
+              <option value="Dental Implants">Dental Implants</option>
+              <option value="Cosmetic Fillings / Smile Design">Cosmetic Fillings / Smile Design</option>
+              <option value="Pediatric Dentistry (Kids Care)">Pediatric Dentistry (Kids Care)</option>
+              <option value="Emergency Midnight Dental Care">Emergency Midnight Dental Care</option>
+              <option value="General Dental Consultation">General Dental Consultation</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- City / Locality -->
+        <div class="review-form-group">
+          <label for="review-location" class="review-form-label">Your Area / City (Optional)</label>
+          <input type="text" id="review-location" name="location" class="field-input" placeholder="e.g. Ponmeni, Madurai">
+        </div>
+
+        <!-- Review Text -->
+        <div class="review-form-group">
+          <label for="review-comment" class="review-form-label">Your Review / Words for Dr. Mayuri & Team *</label>
+          <textarea id="review-comment" name="comment" class="field-input field-textarea" rows="4" placeholder="Tell us about the clinic cleanliness, painless treatment, or doctor consultation..." required minlength="10"></textarea>
+        </div>
+
+        <button type="submit" id="submit-review-btn" class="btn btn-primary btn-submit">
+          <span>Submit Review</span>
+          <i class="ph-bold ph-paper-plane-tilt"></i>
+        </button>
+
+        <div id="review-form-status" class="review-form-status" style="display: none;"></div>
+      </form>
+    </div>
+  </div>
+
   <!-- Floating WhatsApp -->
   <a href="https://wa.me/919677104464" target="_blank" rel="noopener" class="floating-whatsapp" aria-label="Chat on WhatsApp">
     <div class="float-tooltip">Book Appointment</div>
     <i class="ph-fill ph-whatsapp-logo"></i>
   </a>
 
-  <!-- Scripts -->
+  <!-- Firebase SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <!-- Main Website Script -->
   <script src="script.js"></script>
 </body>
 </html>

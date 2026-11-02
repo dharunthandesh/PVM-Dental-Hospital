@@ -199,19 +199,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const dotsContainer = document.getElementById('slider-dots');
     
     if (track) {
-      const cards = track.querySelectorAll('.review-card');
-      const cardCount = cards.length;
+      const getCards = () => track.querySelectorAll('.review-card');
       let cardWidth = 0;
       let currentIndex = 0;
       let autoPlayInterval;
       
       const updateCardWidth = () => {
+        const cards = getCards();
         if (cards.length > 1) {
           cardWidth = cards[1].offsetLeft - cards[0].offsetLeft;
           if (cardWidth <= 0) {
             cardWidth = cards[0].offsetWidth + parseInt(window.getComputedStyle(track).gap || 32);
           }
-        } else {
+        } else if (cards.length === 1) {
           cardWidth = cards[0].offsetWidth;
         }
       };
@@ -235,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!dotsContainer) return;
         dotsContainer.innerHTML = '';
         const visibleCount = getVisibleCardsCount();
+        const cardCount = getCards().length;
         const dotCount = Math.max(1, cardCount - visibleCount + 1);
         
         for (let i = 0; i < dotCount; i++) {
@@ -256,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dots.length === 0) return;
         const visibleCount = getVisibleCardsCount();
         // Determine active dot based on scroll position
-        const scrollIndex = Math.round(track.scrollLeft / cardWidth);
+        const scrollIndex = Math.round(track.scrollLeft / (cardWidth || 1));
         const activeIndex = Math.min(dots.length - 1, scrollIndex);
         
         dots.forEach((dot, idx) => {
@@ -270,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const scrollToIndex = (index) => {
         const visibleCount = getVisibleCardsCount();
+        const cardCount = getCards().length;
         const maxIndex = cardCount - visibleCount;
         currentIndex = Math.max(0, Math.min(index, maxIndex));
         track.scrollLeft = currentIndex * cardWidth;
@@ -281,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
         prevBtn.addEventListener('click', () => {
           stopAutoPlay();
           const visibleCount = getVisibleCardsCount();
+          const cardCount = getCards().length;
           const maxIndex = cardCount - visibleCount;
           if (currentIndex <= 0) {
             scrollToIndex(maxIndex); // Loop to end
@@ -295,6 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nextBtn.addEventListener('click', () => {
           stopAutoPlay();
           const visibleCount = getVisibleCardsCount();
+          const cardCount = getCards().length;
           const maxIndex = cardCount - visibleCount;
           if (currentIndex >= maxIndex) {
             scrollToIndex(0); // Loop to start
@@ -310,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
       track.addEventListener('scroll', () => {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
-          const scrollIndex = Math.round(track.scrollLeft / cardWidth);
+          const scrollIndex = Math.round(track.scrollLeft / (cardWidth || 1));
           currentIndex = scrollIndex;
           updateDots();
         }, 100);
@@ -321,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stopAutoPlay(); // Prevent duplicates
         autoPlayInterval = setInterval(() => {
           const visibleCount = getVisibleCardsCount();
+          const cardCount = getCards().length;
           const maxIndex = cardCount - visibleCount;
           if (currentIndex >= maxIndex) {
             currentIndex = 0;
@@ -329,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           track.scrollLeft = currentIndex * cardWidth;
           updateDots();
-        }, 3000); // Auto scroll every 3 seconds
+        }, 3500); // Auto scroll every 3.5 seconds
       };
       
       const stopAutoPlay = () => {
@@ -349,7 +354,14 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCardWidth();
         generateDots();
         startAutoPlay();
-      }, 500); // Small timeout to ensure page rendering is complete
+      }, 500);
+
+      // Expose re-initialization when dynamic reviews are added
+      window.refreshReviewsSlider = () => {
+        updateCardWidth();
+        generateDots();
+        updateDots();
+      };
     }
 
     // 6. Appointment Booking Form -> WhatsApp Redirection
@@ -468,6 +480,233 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         window.open(whatsappUrl, '_blank');
+      });
+    }
+
+    // 7. Patient Review Modal & Firebase Live Reviews Sync
+    const openReviewModalBtn = document.getElementById('open-review-modal-btn');
+    const closeReviewModalBtn = document.getElementById('close-review-modal-btn');
+    const reviewModal = document.getElementById('review-modal');
+    const reviewModalBackdrop = document.getElementById('review-modal-backdrop');
+    const reviewForm = document.getElementById('patient-review-form');
+    const starBtns = document.querySelectorAll('.star-btn');
+    const ratingInput = document.getElementById('review-rating-input');
+    const ratingText = document.getElementById('rating-feedback-text');
+    const reviewStatus = document.getElementById('review-form-status');
+    const submitReviewBtn = document.getElementById('submit-review-btn');
+
+    // Rating Label Mapping
+    const ratingLabels = {
+      1: '1.0 - Poor Experience',
+      2: '2.0 - Needs Improvement',
+      3: '3.0 - Satisfactory Care',
+      4: '4.0 - Very Good Treatment',
+      5: '5.0 - Excellent Treatment'
+    };
+
+    // Modal Open & Close Handlers
+    function openReviewModal() {
+      if (reviewModal) {
+        reviewModal.classList.add('active');
+        reviewModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeReviewModal() {
+      if (reviewModal) {
+        reviewModal.classList.remove('active');
+        reviewModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+    }
+
+    if (openReviewModalBtn) {
+      openReviewModalBtn.addEventListener('click', openReviewModal);
+    }
+    if (closeReviewModalBtn) {
+      closeReviewModalBtn.addEventListener('click', closeReviewModal);
+    }
+    if (reviewModalBackdrop) {
+      reviewModalBackdrop.addEventListener('click', closeReviewModal);
+    }
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && reviewModal && reviewModal.classList.contains('active')) {
+        closeReviewModal();
+      }
+    });
+
+    // Star Rating Click & Hover Logic
+    const updateStarUI = (rating) => {
+      starBtns.forEach(btn => {
+        const r = parseInt(btn.dataset.rating, 10);
+        if (r <= rating) {
+          btn.classList.add('active');
+          btn.innerHTML = '<i class="ph-fill ph-star"></i>';
+        } else {
+          btn.classList.remove('active');
+          btn.innerHTML = '<i class="ph ph-star"></i>';
+        }
+      });
+      if (ratingText && ratingLabels[rating]) {
+        ratingText.textContent = ratingLabels[rating];
+      }
+    };
+
+    starBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ratingVal = parseInt(btn.dataset.rating, 10);
+        if (ratingInput) ratingInput.value = ratingVal;
+        updateStarUI(ratingVal);
+      });
+
+      btn.addEventListener('mouseenter', () => {
+        const ratingVal = parseInt(btn.dataset.rating, 10);
+        updateStarUI(ratingVal);
+      });
+    });
+
+    const starSelector = document.getElementById('star-rating-selector');
+    if (starSelector) {
+      starSelector.addEventListener('mouseleave', () => {
+        const currentRating = parseInt(ratingInput ? ratingInput.value : 5, 10);
+        updateStarUI(currentRating);
+      });
+    }
+
+    // Review Form Submission
+    if (reviewForm) {
+      reviewForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('review-patient-name').value.trim();
+        const treatment = document.getElementById('review-treatment').value;
+        const rating = ratingInput ? ratingInput.value : '5';
+        const location = document.getElementById('review-location').value.trim();
+        const comment = document.getElementById('review-comment').value.trim();
+
+        if (!name || !treatment || !comment) {
+          if (reviewStatus) {
+            reviewStatus.className = 'review-form-status error';
+            reviewStatus.style.display = 'block';
+            reviewStatus.textContent = 'Please fill out all required fields (*).';
+          }
+          return;
+        }
+
+        // Button Loading State
+        const originalBtnHTML = submitReviewBtn ? submitReviewBtn.innerHTML : '';
+        if (submitReviewBtn) {
+          submitReviewBtn.disabled = true;
+          submitReviewBtn.innerHTML = '<i class="ph-fill ph-spinner ph-spin"></i> Submitting Review...';
+        }
+
+        try {
+          if (window.PVMReviewsDB) {
+            await window.PVMReviewsDB.submitReview({
+              name,
+              treatment,
+              rating,
+              location,
+              comment
+            });
+          }
+
+          // Show Success Feedback
+          if (reviewStatus) {
+            reviewStatus.className = 'review-form-status success';
+            reviewStatus.style.display = 'block';
+            reviewStatus.innerHTML = `
+              <strong><i class="ph-fill ph-check-circle"></i> Thank You, ${escapeHtml(name)}!</strong><br>
+              Your review has been submitted for verification. It will appear on the website once approved by Dr. Mayuri.
+            `;
+          }
+
+          reviewForm.reset();
+          if (ratingInput) ratingInput.value = '5';
+          updateStarUI(5);
+
+          // Close modal after 3 seconds
+          setTimeout(() => {
+            closeReviewModal();
+            if (reviewStatus) reviewStatus.style.display = 'none';
+          }, 3200);
+
+        } catch (err) {
+          console.error("Error submitting review:", err);
+          if (reviewStatus) {
+            reviewStatus.className = 'review-form-status error';
+            reviewStatus.style.display = 'block';
+            reviewStatus.textContent = 'Something went wrong while submitting your review. Please try again or WhatsApp us directly.';
+          }
+        } finally {
+          if (submitReviewBtn) {
+            submitReviewBtn.disabled = false;
+            submitReviewBtn.innerHTML = originalBtnHTML;
+          }
+        }
+      });
+    }
+
+    // Helper to sanitize HTML for dynamically inserted cards
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Live sync approved website reviews into the reviews slider
+    if (track && window.PVMReviewsDB) {
+      window.PVMReviewsDB.subscribeApprovedReviews((approvedReviews) => {
+        // Remove previously rendered dynamic website reviews to prevent duplicates
+        const existingDynamic = track.querySelectorAll('.dynamic-website-review');
+        existingDynamic.forEach(el => el.remove());
+
+        if (!approvedReviews || approvedReviews.length === 0) return;
+
+        // Prepend approved reviews to the front of the slider track
+        approvedReviews.forEach(rev => {
+          const card = document.createElement('div');
+          card.className = 'review-card dynamic-website-review';
+
+          let starsHtml = '';
+          const starCount = Number(rev.rating) || 5;
+          for (let i = 1; i <= 5; i++) {
+            starsHtml += `<i class="ph-fill ph-star" style="color: ${i <= starCount ? '#F59E0B' : '#E2E8F0'}"></i>`;
+          }
+
+          const dateDisplay = rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'short', year: 'numeric'
+          }) : 'Verified Patient';
+
+          card.innerHTML = `
+            <div class="review-card-verified-badge">
+              <i class="ph-fill ph-seal-check"></i> Verified Patient Review
+            </div>
+            <div class="review-quote-icon"><i class="ph-fill ph-quotes"></i></div>
+            <div class="review-stars">${starsHtml}</div>
+            <p class="review-text">"${escapeHtml(rev.comment)}"</p>
+            <div class="review-author">
+              <div class="author-name">${escapeHtml(rev.name)}</div>
+              <div class="author-treatment">${escapeHtml(rev.treatment || 'General Dental Care')} ${rev.location ? '• ' + escapeHtml(rev.location) : ''}</div>
+              <div class="review-card-date-tag">${dateDisplay}</div>
+            </div>
+          `;
+
+          // Prepend as first child of slider track
+          track.insertBefore(card, track.firstChild);
+        });
+
+        // Recalculate slider dimensions and navigation dots
+        if (typeof window.refreshReviewsSlider === 'function') {
+          window.refreshReviewsSlider();
+        }
       });
     }
   });

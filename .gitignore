@@ -1,0 +1,7 @@
+# Screen recordings & zip archives
+Recording *.mp4
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db

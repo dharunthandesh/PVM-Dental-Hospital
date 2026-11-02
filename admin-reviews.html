@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Review Portal | PVM Dental Hospital</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <!-- Firebase SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --primary: #A81C2E;
+      --primary-dark: #821221;
+      --primary-light: #FDF2F4;
+      --secondary: #281A1C;
+      --accent: #C9A96E;
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --radius: 12px;
+      --shadow: 0 4px 20px -2px rgba(40, 26, 28, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Auth Screen */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(40, 26, 28, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 999;
+    }
+    .auth-card {
+      background: #FFFFFF;
+      max-width: 400px;
+      width: 100%;
+      border-radius: 16px;
+      padding: 2.25rem 2rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      text-align: center;
+    }
+    .auth-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .auth-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--secondary);
+      margin-bottom: 0.35rem;
+    }
+    .auth-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.75rem;
+    }
+    .pin-input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-size: 1.25rem;
+      letter-spacing: 0.3em;
+      text-align: center;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1.25rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .pin-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(168, 28, 46, 0.1);
+    }
+    .btn-auth {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+    }
+    .btn-auth:hover { background: var(--primary-dark); }
+    .auth-err {
+      color: var(--danger);
+      font-size: 0.85rem;
+      margin-top: 0.75rem;
+      display: none;
+    }
+
+    /* Top Nav */
+    .top-header {
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.1;
+    }
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .btn-view-site {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-light);
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-view-site:hover { background: #fae4e8; }
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.8rem;
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .btn-logout:hover { color: var(--danger); border-color: var(--danger); }
+
+    /* Main Container */
+    .dashboard-main {
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      flex: 1;
+    }
+
+    /* Notification banner */
+    .status-banner {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      color: #1E40AF;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: #FFFFFF;
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .stat-icon.pending { background: #FEF3C7; color: #D97706; }
+    .stat-icon.approved { background: #D1FAE5; color: #059669; }
+    .stat-icon.total { background: #EDE9FE; color: #7C3AED; }
+    .stat-num {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--secondary);
+      line-height: 1.1;
+    }
+    .stat-lbl {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Tabs Filter */
+    .tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+      overflow-x: auto;
+    }
+    .tab-item {
+      background: transparent;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+    .tab-item:hover { color: var(--primary); background: var(--primary-light); }
+    .tab-item.active {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+    .tab-badge {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 9999px;
+      background: rgba(0,0,0,0.1);
+    }
+    .tab-item.active .tab-badge {
+      background: rgba(255,255,255,0.25);
+    }
+
+    /* Reviews List */
+    .reviews-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .review-item {
+      background: #FFFFFF;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .review-item.is-pending {
+      border-left: 4px solid var(--warning);
+    }
+    .review-item.is-approved {
+      border-left: 4px solid var(--success);
+    }
+    .item-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .patient-meta h3 {
+      font-size: 1.1rem;
+      color: var(--secondary);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .treatment-tag {
+      font-size: 0.75rem;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .location-tag {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .status-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .status-pill.pending { background: #FEF3C7; color: #92400E; }
+    .status-pill.approved { background: #D1FAE5; color: #065F46; }
+
+    .item-rating {
+      color: #F59E0B;
+      font-size: 1.05rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.15rem;
+    }
+    .item-date {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+    .item-comment {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.6;
+      background: #F8FAFC;
+      padding: 1rem 1.15rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      border: 1px solid #EDF2F7;
+    }
+
+    /* Action Buttons */
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .btn-action {
+      padding: 0.55rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+    .btn-approve {
+      background: var(--success);
+      color: #FFFFFF;
+    }
+    .btn-approve:hover { background: #059669; }
+    .btn-unpublish {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+    .btn-unpublish:hover { background: #FDE68A; }
+    .btn-delete {
+      background: #FEE2E2;
+      color: var(--danger);
+    }
+    .btn-delete:hover { background: #FCA5A5; }
+
+    /* Empty state */
+    .empty-state {
+      background: #FFFFFF;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 4rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .empty-icon {
+      font-size: 3rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Secret PIN Auth Overlay -->
+  <div id="auth-overlay" class="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-icon">
+        <i class="ph-fill ph-lock-key"></i>
+      </div>
+      <h2 class="auth-title">Doctor Portal</h2>
+      <p class="auth-sub">Enter your 4-digit PIN to manage patient reviews</p>
+      
+      <form id="auth-form">
+        <input type="password" id="pin-input" class="pin-input" maxlength="6" placeholder="••••" autofocus required>
+        <button type="submit" class="btn-auth">
+          <i class="ph-bold ph-arrow-right"></i> Unlock Portal
+        </button>
+        <div id="auth-err" class="auth-err">Incorrect PIN. Please try again.</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="top-header">
+    <div class="header-content">
+      <div class="brand-group">
+        <img src="favicon-180.png" alt="PVM Dental Hospital" class="brand-logo">
+        <div>
+          <div class="brand-title">PVM Dental Hospital</div>
+          <div class="brand-sub">Doctor Review Moderation Portal</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="index.html#reviews" target="_blank" class="btn-view-site">
+          <i class="ph-bold ph-arrow-square-out"></i> View Website
+        </a>
+        <button id="logout-btn" class="btn-logout" title="Lock Portal">
+          <i class="ph-bold ph-sign-out"></i> Lock
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+
+    <!-- Firebase Connection Notice -->
+    <div id="db-status-banner" class="status-banner">
+      <i class="ph-fill ph-info"></i>
+      <span id="db-status-text">Loading reviews...</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <i class="ph-fill ph-clock-countdown"></i>
+        </div>
+        <div>
+          <div class="stat-num" id="stat-pending">0</div>
+          <div class="stat-lbl">Pending Approval</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon approved">
+          <i class="ph-fill ph-check-circle"></i>
+        </div>
+        <div>
+          <div class="stat-num" id="stat-approved">0</div>
+          <div class="stat-lbl">Live on Website</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <i class="ph-fill ph-chat-circle-dots"></i>
+        </div>
+        <div>
+          <div class="stat-num" id="stat-total">0</div>
+          <div class="stat-lbl">Total Patient Reviews</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-item active" data-filter="pending">
+        Pending <span class="tab-badge" id="tab-pending-count">0</span>
+      </button>
+      <button class="tab-item" data-filter="approved">
+        Live on Website <span class="tab-badge" id="tab-approved-count">0</span>
+      </button>
+      <button class="tab-item" data-filter="all">
+        All Reviews
+      </button>
+    </div>
+
+    <!-- Reviews List Container -->
+    <div id="reviews-container" class="reviews-list">
+      <!-- Injected via JavaScript -->
+    </div>
+
+  </main>
+
+  <script>
+    // 1. PIN Code Authentication (Default PIN: 2026 - can be customized)
+    const CORRECT_PIN = "2026";
+    const SESSION_KEY = "pvm_doctor_portal_authenticated";
+
+    const authOverlay = document.getElementById('auth-overlay');
+    const authForm = document.getElementById('auth-form');
+    const pinInput = document.getElementById('pin-input');
+    const authErr = document.getElementById('auth-err');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    const checkAuth = () => {
+      if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+        authOverlay.style.display = 'none';
+        loadDashboard();
+      } else {
+        authOverlay.style.display = 'flex';
+        pinInput.focus();
+      }
+    };
+
+    authForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (pinInput.value === CORRECT_PIN) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        authErr.style.display = 'none';
+        authOverlay.style.display = 'none';
+        loadDashboard();
+      } else {
+        authErr.style.display = 'block';
+        pinInput.value = '';
+        pinInput.focus();
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem(SESSION_KEY);
+      checkAuth();
+    });
+
+    // 2. Dashboard Logic
+    let allReviews = [];
+    let currentFilter = 'pending';
+
+    function loadDashboard() {
+      const bannerText = document.getElementById('db-status-text');
+      if (window.PVMReviewsDB && window.PVMReviewsDB.isConfigured()) {
+        bannerText.innerHTML = "Connected to <strong>Firebase Cloud Firestore</strong>. Any approved review updates immediately on all patient devices.";
+      } else {
+        bannerText.innerHTML = "Currently running in <strong>Local Preview Mode</strong>. Configure your Firebase keys in <code>firebase-config.js</code> to sync live across devices.";
+      }
+
+      // Subscribe to real-time reviews
+      if (window.PVMReviewsDB) {
+        window.PVMReviewsDB.subscribeAllReviews((reviews) => {
+          allReviews = reviews;
+          updateStats();
+          renderReviews();
+        });
+      }
+    }
+
+    function updateStats() {
+      const pendingCount = allReviews.filter(r => !r.isApproved).length;
+      const approvedCount = allReviews.filter(r => r.isApproved).length;
+
+      document.getElementById('stat-pending').textContent = pendingCount;
+      document.getElementById('stat-approved').textContent = approvedCount;
+      document.getElementById('stat-total').textContent = allReviews.length;
+
+      document.getElementById('tab-pending-count').textContent = pendingCount;
+      document.getElementById('tab-approved-count').textContent = approvedCount;
+    }
+
+    // Tab Switching
+    document.querySelectorAll('.tab-item').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        renderReviews();
+      });
+    });
+
+    function renderReviews() {
+      const container = document.getElementById('reviews-container');
+      container.innerHTML = '';
+
+      let filtered = allReviews;
+      if (currentFilter === 'pending') {
+        filtered = allReviews.filter(r => !r.isApproved);
+      } else if (currentFilter === 'approved') {
+        filtered = allReviews.filter(r => r.isApproved);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><i class="ph-duotone ph-chats-circle"></i></div>
+            <h3>No ${currentFilter === 'pending' ? 'pending' : ''} reviews found</h3>
+            <p>New reviews submitted by patients on the website will appear here for approval.</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(rev => {
+        const item = document.createElement('div');
+        item.className = `review-item ${rev.isApproved ? 'is-approved' : 'is-pending'}`;
+
+        // Stars HTML
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          starsHtml += `<i class="ph-fill ph-star" style="color: ${i <= rev.rating ? '#F59E0B' : '#E2E8F0'}"></i>`;
+        }
+
+        // Formatted Date
+        const dateStr = rev.createdAt ? new Date(rev.createdAt).toLocaleDateString('en-IN', {
+          day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        }) : 'Recently';
+
+        item.innerHTML = `
+          <div class="item-header">
+            <div class="patient-meta">
+              <h3>
+                ${escapeHtml(rev.name)}
+                <span class="treatment-tag">${escapeHtml(rev.treatment || 'General Dental Care')}</span>
+              </h3>
+              ${rev.location ? `<span class="location-tag"><i class="ph-fill ph-map-pin"></i> ${escapeHtml(rev.location)}</span>` : ''}
+            </div>
+            <div>
+              ${rev.isApproved ? 
+                `<span class="status-pill approved"><i class="ph-fill ph-check-circle"></i> Live on Website</span>` : 
+                `<span class="status-pill pending"><i class="ph-fill ph-clock-countdown"></i> Needs Approval</span>`
+              }
+            </div>
+          </div>
+
+          <div class="item-rating">
+            ${starsHtml}
+            <span class="item-date">• ${dateStr}</span>
+          </div>
+
+          <p class="item-comment">"${escapeHtml(rev.comment)}"</p>
+
+          <div class="item-actions">
+            ${!rev.isApproved ? `
+              <button class="btn-action btn-approve" onclick="handleApprove('${rev.id}')">
+                <i class="ph-bold ph-check"></i> Approve & Publish Live
+              </button>
+            ` : `
+              <button class="btn-action btn-unpublish" onclick="handleUnpublish('${rev.id}')">
+                <i class="ph-bold ph-eye-slash"></i> Unpublish to Pending
+              </button>
+            `}
+            <button class="btn-action btn-delete" onclick="handleDelete('${rev.id}', '${escapeHtml(rev.name)}')">
+              <i class="ph-bold ph-trash"></i> Delete
+            </button>
+          </div>
+        `;
+
+        container.appendChild(item);
+      });
+    }
+
+    async function handleApprove(id) {
+      if (window.PVMReviewsDB) {
+        await window.PVMReviewsDB.approveReview(id);
+      }
+    }
+
+    async function handleUnpublish(id) {
+      if (window.PVMReviewsDB) {
+        await window.PVMReviewsDB.unpublishReview(id);
+      }
+    }
+
+    async function handleDelete(id, name) {
+      if (confirm(`Are you sure you want to permanently delete the review from ${name}?`)) {
+        if (window.PVMReviewsDB) {
+          await window.PVMReviewsDB.deleteReview(id);
+        }
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Initialize Auth
+    checkAuth();
+  </script>
+</body>
+</html>

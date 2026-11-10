@@ -41,7 +41,17 @@ const localSubscribersAll = new Set();
 
 const getLocalReviews = () => {
   try {
-    return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+    const list = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+    // Automatically filter out and delete any test review matching 'set-74'
+    const cleaned = list.filter(r => {
+      const name = (r.name || '').toLowerCase();
+      const comment = (r.comment || '').toLowerCase();
+      return !name.includes('set-74') && !comment.includes('set-74');
+    });
+    if (cleaned.length !== list.length) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch (e) {
     return [];
   }

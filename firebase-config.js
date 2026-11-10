@@ -34,24 +34,21 @@ if (typeof firebase !== 'undefined' && isFirebaseConfigured()) {
   }
 }
 
-// LocalStorage fallback (allows full testing before Firebase credentials are added)
+// LocalStorage fallback (allows testing before Firebase credentials are added or when offline)
 const LOCAL_STORAGE_KEY = 'pvm_patient_reviews_local';
 const localSubscribersApproved = new Set();
 const localSubscribersAll = new Set();
 
+// If Firebase is connected, clear local cache so deleted reviews do not persist
+if (db) {
+  try {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  } catch (e) {}
+}
+
 const getLocalReviews = () => {
   try {
-    const list = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
-    // Automatically filter out and delete any test review matching 'set-74'
-    const cleaned = list.filter(r => {
-      const name = (r.name || '').toLowerCase();
-      const comment = (r.comment || '').toLowerCase();
-      return !name.includes('set-74') && !comment.includes('set-74');
-    });
-    if (cleaned.length !== list.length) {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cleaned));
-    }
-    return cleaned;
+    return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
   } catch (e) {
     return [];
   }
@@ -104,8 +101,6 @@ window.PVMReviewsDB = {
       source: 'website'
     };
 
-    let savedReview = null;
-
     if (db) {
       try {
         // Save directly to Cloud Firestore 'reviews' collection
@@ -113,72 +108,47 @@ window.PVMReviewsDB = {
           ...reviewData,
           serverTimestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        savedReview = { id: docRef.id, ...reviewData };
+        return { id: docRef.id, ...reviewData };
       } catch (firestoreErr) {
-        console.warn("Firestore write rejected (check Firestore Security Rules). Falling back to local storage so patient review reflects immediately:", firestoreErr);
+        console.warn("Firestore write rejected (check Firestore Security Rules). Saving locally:", firestoreErr);
       }
     }
 
-    // Fallback or local sync: guarantee patient review is never lost and always displays
+    // Only if db is not connected or write failed, use local storage fallback
     const localReviews = getLocalReviews();
-    if (!savedReview) {
-      savedReview = { id: 'local_' + Date.now(), ...reviewData };
-    }
-    const filtered = localReviews.filter(r => r.id !== savedReview.id);
-    filtered.unshift(savedReview);
-    saveLocalReviews(filtered);
-
-    return savedReview;
+    const newReview = { id: 'local_' + Date.now(), ...reviewData };
+    localReviews.unshift(newReview);
+    saveLocalReviews(localReviews);
+    return newReview;
   },
 
   /**
-   * Listen to or fetch all APPROVED reviews for public display on the website
+   * Listen to all APPROVED reviews for public display on the website
+   * Firebase Cloud Firestore is the SINGLE SOURCE OF TRUTH.
+   * If a review is deleted in Firebase Console, it disappears live immediately.
    */
   subscribeApprovedReviews(callback) {
     if (db) {
-      const emitMerged = (firestoreReviews = []) => {
-        const localApproved = getLocalReviews().filter(r => r.isApproved);
-        const map = new Map();
-        firestoreReviews.forEach(r => map.set(r.id, r));
-        localApproved.forEach(r => {
-          if (!map.has(r.id)) map.set(r.id, r);
-        });
-        const combined = Array.from(map.values());
-        combined.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-        callback(combined);
-      };
-
-      let lastFirestoreReviews = [];
-      const localCb = () => emitMerged(lastFirestoreReviews);
-      localSubscribersApproved.add(localCb);
-
-      let unsubscribe = null;
-      try {
-        unsubscribe = db.collection('reviews')
-          .where('isApproved', '==', true)
-          .onSnapshot(
-            (snapshot) => {
-              const reviews = [];
-              snapshot.forEach((doc) => {
-                reviews.push({ id: doc.id, ...doc.data() });
-              });
-              lastFirestoreReviews = reviews;
-              emitMerged(reviews);
-            },
-            (err) => {
-              console.warn("Error fetching approved reviews from Firestore (check rules):", err);
-              emitMerged([]);
-            }
-          );
-      } catch (e) {
-        console.warn("Firestore subscription failed, using local storage:", e);
-        emitMerged([]);
-      }
-
-      return () => {
-        localSubscribersApproved.delete(localCb);
-        if (typeof unsubscribe === 'function') unsubscribe();
-      };
+      return db.collection('reviews')
+        .where('isApproved', '==', true)
+        .onSnapshot(
+          (snapshot) => {
+            const reviews = [];
+            snapshot.forEach((doc) => {
+              reviews.push({ id: doc.id, ...doc.data() });
+            });
+            reviews.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            // Keep local storage strictly in sync with Firestore
+            try {
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(reviews));
+            } catch (e) {}
+            callback(reviews);
+          },
+          (err) => {
+            console.warn("Firestore listener error, using local fallback:", err);
+            callback(getLocalReviews().filter(r => r.isApproved));
+          }
+        );
     } else {
       localSubscribersApproved.add(callback);
       callback(getLocalReviews().filter(r => r.isApproved));
@@ -191,48 +161,21 @@ window.PVMReviewsDB = {
    */
   subscribeAllReviews(callback) {
     if (db) {
-      const emitMerged = (firestoreReviews = []) => {
-        const localAll = getLocalReviews();
-        const map = new Map();
-        firestoreReviews.forEach(r => map.set(r.id, r));
-        localAll.forEach(r => {
-          if (!map.has(r.id)) map.set(r.id, r);
-        });
-        const combined = Array.from(map.values());
-        combined.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-        callback(combined);
-      };
-
-      let lastFirestoreReviews = [];
-      const localCb = () => emitMerged(lastFirestoreReviews);
-      localSubscribersAll.add(localCb);
-
-      let unsubscribe = null;
-      try {
-        unsubscribe = db.collection('reviews')
-          .onSnapshot(
-            (snapshot) => {
-              const reviews = [];
-              snapshot.forEach((doc) => {
-                reviews.push({ id: doc.id, ...doc.data() });
-              });
-              lastFirestoreReviews = reviews;
-              emitMerged(reviews);
-            },
-            (err) => {
-              console.warn("Error fetching admin reviews from Firestore:", err);
-              emitMerged([]);
-            }
-          );
-      } catch (e) {
-        console.warn("Firestore admin subscription failed, using local storage:", e);
-        emitMerged([]);
-      }
-
-      return () => {
-        localSubscribersAll.delete(localCb);
-        if (typeof unsubscribe === 'function') unsubscribe();
-      };
+      return db.collection('reviews')
+        .onSnapshot(
+          (snapshot) => {
+            const reviews = [];
+            snapshot.forEach((doc) => {
+              reviews.push({ id: doc.id, ...doc.data() });
+            });
+            reviews.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            callback(reviews);
+          },
+          (err) => {
+            console.warn("Firestore admin listener error, using local fallback:", err);
+            callback(getLocalReviews());
+          }
+        );
     } else {
       localSubscribersAll.add(callback);
       callback(getLocalReviews());

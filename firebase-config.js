@@ -80,7 +80,7 @@ window.PVMReviewsDB = {
 
   /**
    * Submit a new patient review
-   * By default saved with isApproved: false for doctor moderation
+   * Directly approved (isApproved: true) to reflect immediately on the website without verification
    */
   async submitReview({ name, treatment, rating, comment, location }) {
     const reviewData = {
@@ -89,7 +89,7 @@ window.PVMReviewsDB = {
       rating: Number(rating) || 5,
       comment: comment.trim(),
       location: location ? location.trim() : 'Madurai',
-      isApproved: false,
+      isApproved: true,
       createdAt: new Date().toISOString(),
       source: 'website'
     };

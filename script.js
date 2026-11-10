@@ -620,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reviewStatus.style.display = 'block';
             reviewStatus.innerHTML = `
               <strong><i class="ph-fill ph-check-circle"></i> Thank You, ${escapeHtml(name)}!</strong><br>
-              Your review has been submitted for verification. It will appear on the website once approved by Dr. Mayuri.
+              Your review has been published and is now live on our website!
             `;
           }
 
@@ -671,7 +671,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!approvedReviews || approvedReviews.length === 0) return;
 
         // Prepend approved reviews to the front of the slider track
-        approvedReviews.forEach(rev => {
+        // Reverse first so the newest review (index 0) remains the first item in the DOM track
+        approvedReviews.slice().reverse().forEach(rev => {
           const card = document.createElement('div');
           card.className = 'review-card dynamic-website-review';
 

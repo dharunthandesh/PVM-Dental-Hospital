@@ -503,22 +503,22 @@
     <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon pending">
-          <i class="ph-fill ph-clock-countdown"></i>
-        </div>
-        <div>
-          <div class="stat-num" id="stat-pending">0</div>
-          <div class="stat-lbl">Pending Approval</div>
-        </div>
-      </div>
-
-      <div class="stat-card">
         <div class="stat-icon approved">
           <i class="ph-fill ph-check-circle"></i>
         </div>
         <div>
           <div class="stat-num" id="stat-approved">0</div>
           <div class="stat-lbl">Live on Website</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <i class="ph-fill ph-clock-countdown"></i>
+        </div>
+        <div>
+          <div class="stat-num" id="stat-pending">0</div>
+          <div class="stat-lbl">Hidden / Unpublished</div>
         </div>
       </div>
 
@@ -535,11 +535,11 @@
 
     <!-- Filter Tabs -->
     <div class="tabs-bar">
-      <button class="tab-item active" data-filter="pending">
-        Pending <span class="tab-badge" id="tab-pending-count">0</span>
-      </button>
-      <button class="tab-item" data-filter="approved">
+      <button class="tab-item active" data-filter="approved">
         Live on Website <span class="tab-badge" id="tab-approved-count">0</span>
+      </button>
+      <button class="tab-item" data-filter="pending">
+        Hidden / Unpublished <span class="tab-badge" id="tab-pending-count">0</span>
       </button>
       <button class="tab-item" data-filter="all">
         All Reviews
@@ -595,12 +595,12 @@
 
     // 2. Dashboard Logic
     let allReviews = [];
-    let currentFilter = 'pending';
+    let currentFilter = 'approved';
 
     function loadDashboard() {
       const bannerText = document.getElementById('db-status-text');
       if (window.PVMReviewsDB && window.PVMReviewsDB.isConfigured()) {
-        bannerText.innerHTML = "Connected to <strong>Firebase Cloud Firestore</strong>. Any approved review updates immediately on all patient devices.";
+        bannerText.innerHTML = "Connected to <strong>Firebase Cloud Firestore</strong>. Reviews submitted on the website reflect live immediately.";
       } else {
         bannerText.innerHTML = "Currently running in <strong>Local Preview Mode</strong>. Configure your Firebase keys in <code>firebase-config.js</code> to sync live across devices.";
       }
@@ -649,11 +649,21 @@
       }
 
       if (filtered.length === 0) {
+        let emptyTitle = 'No reviews found';
+        let emptyDesc = 'Reviews submitted on the website will appear here.';
+        if (currentFilter === 'pending') {
+          emptyTitle = 'No hidden or unpublished reviews';
+          emptyDesc = 'Any reviews you unpublish or hide from the website will appear here.';
+        } else if (currentFilter === 'approved') {
+          emptyTitle = 'No live reviews yet';
+          emptyDesc = 'Patient reviews submitted on the website will automatically appear live here.';
+        }
+
         container.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon"><i class="ph-duotone ph-chats-circle"></i></div>
-            <h3>No ${currentFilter === 'pending' ? 'pending' : ''} reviews found</h3>
-            <p>New reviews submitted by patients on the website will appear here for approval.</p>
+            <h3>${emptyTitle}</h3>
+            <p>${emptyDesc}</p>
           </div>
         `;
         return;

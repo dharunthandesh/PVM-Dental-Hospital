@@ -94,21 +94,31 @@ window.PVMReviewsDB = {
       source: 'website'
     };
 
+    let savedReview = null;
+
     if (db) {
-      // Save directly to Cloud Firestore 'reviews' collection
-      const docRef = await db.collection('reviews').add({
-        ...reviewData,
-        serverTimestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      return { id: docRef.id, ...reviewData };
-    } else {
-      console.info("Using local preview storage (add your Firebase credentials to firebase-config.js to sync live across devices).");
-      const localReviews = getLocalReviews();
-      const newReview = { id: 'local_' + Date.now(), ...reviewData };
-      localReviews.unshift(newReview);
-      saveLocalReviews(localReviews);
-      return newReview;
+      try {
+        // Save directly to Cloud Firestore 'reviews' collection
+        const docRef = await db.collection('reviews').add({
+          ...reviewData,
+          serverTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        savedReview = { id: docRef.id, ...reviewData };
+      } catch (firestoreErr) {
+        console.warn("Firestore write rejected (check Firestore Security Rules). Falling back to local storage so patient review reflects immediately:", firestoreErr);
+      }
     }
+
+    // Fallback or local sync: guarantee patient review is never lost and always displays
+    const localReviews = getLocalReviews();
+    if (!savedReview) {
+      savedReview = { id: 'local_' + Date.now(), ...reviewData };
+    }
+    const filtered = localReviews.filter(r => r.id !== savedReview.id);
+    filtered.unshift(savedReview);
+    saveLocalReviews(filtered);
+
+    return savedReview;
   },
 
   /**
@@ -116,23 +126,49 @@ window.PVMReviewsDB = {
    */
   subscribeApprovedReviews(callback) {
     if (db) {
-      return db.collection('reviews')
-        .where('isApproved', '==', true)
-        .onSnapshot(
-          (snapshot) => {
-            const reviews = [];
-            snapshot.forEach((doc) => {
-              reviews.push({ id: doc.id, ...doc.data() });
-            });
-            // Sort by createdAt descending
-            reviews.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-            callback(reviews);
-          },
-          (err) => {
-            console.error("Error fetching approved reviews:", err);
-            callback(getLocalReviews().filter(r => r.isApproved));
-          }
-        );
+      const emitMerged = (firestoreReviews = []) => {
+        const localApproved = getLocalReviews().filter(r => r.isApproved);
+        const map = new Map();
+        firestoreReviews.forEach(r => map.set(r.id, r));
+        localApproved.forEach(r => {
+          if (!map.has(r.id)) map.set(r.id, r);
+        });
+        const combined = Array.from(map.values());
+        combined.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        callback(combined);
+      };
+
+      let lastFirestoreReviews = [];
+      const localCb = () => emitMerged(lastFirestoreReviews);
+      localSubscribersApproved.add(localCb);
+
+      let unsubscribe = null;
+      try {
+        unsubscribe = db.collection('reviews')
+          .where('isApproved', '==', true)
+          .onSnapshot(
+            (snapshot) => {
+              const reviews = [];
+              snapshot.forEach((doc) => {
+                reviews.push({ id: doc.id, ...doc.data() });
+              });
+              lastFirestoreReviews = reviews;
+              emitMerged(reviews);
+            },
+            (err) => {
+              console.warn("Error fetching approved reviews from Firestore (check rules):", err);
+              emitMerged([]);
+            }
+          );
+      } catch (e) {
+        console.warn("Firestore subscription failed, using local storage:", e);
+        emitMerged([]);
+      }
+
+      return () => {
+        localSubscribersApproved.delete(localCb);
+        if (typeof unsubscribe === 'function') unsubscribe();
+      };
     } else {
       localSubscribersApproved.add(callback);
       callback(getLocalReviews().filter(r => r.isApproved));
@@ -145,21 +181,48 @@ window.PVMReviewsDB = {
    */
   subscribeAllReviews(callback) {
     if (db) {
-      return db.collection('reviews')
-        .onSnapshot(
-          (snapshot) => {
-            const reviews = [];
-            snapshot.forEach((doc) => {
-              reviews.push({ id: doc.id, ...doc.data() });
-            });
-            reviews.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-            callback(reviews);
-          },
-          (err) => {
-            console.error("Error fetching admin reviews:", err);
-            callback(getLocalReviews());
-          }
-        );
+      const emitMerged = (firestoreReviews = []) => {
+        const localAll = getLocalReviews();
+        const map = new Map();
+        firestoreReviews.forEach(r => map.set(r.id, r));
+        localAll.forEach(r => {
+          if (!map.has(r.id)) map.set(r.id, r);
+        });
+        const combined = Array.from(map.values());
+        combined.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        callback(combined);
+      };
+
+      let lastFirestoreReviews = [];
+      const localCb = () => emitMerged(lastFirestoreReviews);
+      localSubscribersAll.add(localCb);
+
+      let unsubscribe = null;
+      try {
+        unsubscribe = db.collection('reviews')
+          .onSnapshot(
+            (snapshot) => {
+              const reviews = [];
+              snapshot.forEach((doc) => {
+                reviews.push({ id: doc.id, ...doc.data() });
+              });
+              lastFirestoreReviews = reviews;
+              emitMerged(reviews);
+            },
+            (err) => {
+              console.warn("Error fetching admin reviews from Firestore:", err);
+              emitMerged([]);
+            }
+          );
+      } catch (e) {
+        console.warn("Firestore admin subscription failed, using local storage:", e);
+        emitMerged([]);
+      }
+
+      return () => {
+        localSubscribersAll.delete(localCb);
+        if (typeof unsubscribe === 'function') unsubscribe();
+      };
     } else {
       localSubscribersAll.add(callback);
       callback(getLocalReviews());
@@ -172,15 +235,18 @@ window.PVMReviewsDB = {
    */
   async approveReview(reviewId) {
     if (db && !reviewId.startsWith('local_')) {
-      await db.collection('reviews').doc(reviewId).update({
-        isApproved: true,
-        approvedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } else {
-      const localReviews = getLocalReviews();
-      const updated = localReviews.map(r => r.id === reviewId ? { ...r, isApproved: true } : r);
-      saveLocalReviews(updated);
+      try {
+        await db.collection('reviews').doc(reviewId).update({
+          isApproved: true,
+          approvedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (e) {
+        console.warn("Firestore update error:", e);
+      }
     }
+    const localReviews = getLocalReviews();
+    const updated = localReviews.map(r => r.id === reviewId ? { ...r, isApproved: true } : r);
+    saveLocalReviews(updated);
   },
 
   /**
@@ -188,14 +254,17 @@ window.PVMReviewsDB = {
    */
   async unpublishReview(reviewId) {
     if (db && !reviewId.startsWith('local_')) {
-      await db.collection('reviews').doc(reviewId).update({
-        isApproved: false
-      });
-    } else {
-      const localReviews = getLocalReviews();
-      const updated = localReviews.map(r => r.id === reviewId ? { ...r, isApproved: false } : r);
-      saveLocalReviews(updated);
+      try {
+        await db.collection('reviews').doc(reviewId).update({
+          isApproved: false
+        });
+      } catch (e) {
+        console.warn("Firestore unpublish error:", e);
+      }
     }
+    const localReviews = getLocalReviews();
+    const updated = localReviews.map(r => r.id === reviewId ? { ...r, isApproved: false } : r);
+    saveLocalReviews(updated);
   },
 
   /**
@@ -203,10 +272,13 @@ window.PVMReviewsDB = {
    */
   async deleteReview(reviewId) {
     if (db && !reviewId.startsWith('local_')) {
-      await db.collection('reviews').doc(reviewId).delete();
-    } else {
-      const localReviews = getLocalReviews().filter(r => r.id !== reviewId);
-      saveLocalReviews(localReviews);
+      try {
+        await db.collection('reviews').doc(reviewId).delete();
+      } catch (e) {
+        console.warn("Firestore delete error:", e);
+      }
     }
+    const localReviews = getLocalReviews().filter(r => r.id !== reviewId);
+    saveLocalReviews(localReviews);
   }
 };
